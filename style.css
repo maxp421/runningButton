@@ -1,0 +1,28 @@
+* {
+  margin: 0;
+}
+body {
+  height: 100vh;
+  /* display: flex; */
+  /* justify-content: center; */
+  /* align-items: center; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.ratingBox {
+  width: 200px;
+  display: flex;
+  padding: 1em;
+  justify-content: space-between;
+  border: 1px solid black;
+}
+.rate {
+  color: black;
+  border: none;
+  background-color: transparent;
+}
+
+.rate:hover {
+  background-color: green;
+}
