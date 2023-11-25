@@ -14,7 +14,10 @@ function avoidPointer(e, elem) {
     x: elemCoords.centerX - e.clientX,
     y: elemCoords.centerY - e.clientY,
   };
-  const pointerRelativeToElem = {
+
+  //rename to pointer, make move work even if only one condition is triggered?
+  //add function pointer.inTriggerZone = true/false;
+  const pointer = {
     isLeft:
       distanceFromCenter.x <= elem.offsetWidth / 2 + triggerDistance &&
       distanceFromCenter.x >= 0,
@@ -27,9 +30,16 @@ function avoidPointer(e, elem) {
     isBottom:
       distanceFromCenter.y >= -(elem.offsetHeight / 2 + triggerDistance) &&
       distanceFromCenter.y <= 0,
+    hasTriggeredMove: function () {
+      return (
+        (this.isLeft && this.isTop) ||
+        (this.isLeft && this.isBottom) ||
+        (this.isRight && this.isTop) ||
+        (this.isRight && this.isBottom)
+      );
+    },
   };
-
-  moveElemRelativeToPointer(elem, elemCoords, pointerRelativeToElem);
+  moveElemRelativeToPointer(elem, elemCoords, pointer);
 }
 
 function getCoords(elem) {
@@ -46,18 +56,8 @@ function getCoords(elem) {
   };
 }
 
-function moveElemRelativeToPointer(elem, elemCoords, pointerRelativeToElem) {
-  //INITIALIZE ELEM AS ABSOLUTE
-  if (
-    !(
-      (pointerRelativeToElem.isLeft && pointerRelativeToElem.isTop) ||
-      (pointerRelativeToElem.isLeft && pointerRelativeToElem.isBottom) ||
-      (pointerRelativeToElem.isRight && pointerRelativeToElem.isTop) ||
-      (pointerRelativeToElem.isRight && pointerRelativeToElem.isBottom)
-    )
-  ) {
-    return;
-  }
+function moveElemRelativeToPointer(elem, elemCoords, pointer) {
+  if (!pointer.hasTriggeredMove()) return;
   if (elem.style.position !== "absolute") {
     elem.style.position = "absolute"; // we want this to become absolute when
     elem.style.left = elemCoords.left + "px";
@@ -69,8 +69,8 @@ function moveElemRelativeToPointer(elem, elemCoords, pointerRelativeToElem) {
   function getRandomDistance() {
     return 40 + Math.random() * 25;
   }
-  const dist1 = getRandomDistance();
-  const dist2 = getRandomDistance();
+  const randomDistance1 = getRandomDistance();
+  const randomDistance2 = getRandomDistance();
 
   const scrollHeight = Math.max(
     document.body.scrollHeight,
@@ -82,65 +82,32 @@ function moveElemRelativeToPointer(elem, elemCoords, pointerRelativeToElem) {
   );
   const scrollWidth = document.documentElement.clientWidth;
 
-  if (pointerRelativeToElem.isLeft && pointerRelativeToElem.isTop) {
-    //right bounds
-    if (elemCoords.right + dist1 >= scrollWidth) {
-      elem.style.left = elemCoords.left - 2 * dist1 + "px";
+  if (pointer.isLeft) {
+    if (elemCoords.right + randomDistance1 >= scrollWidth) {
+      elem.style.left = elemCoords.left - 2 * randomDistance1 + "px";
     } else {
-      elem.style.left = elemCoords.left + dist1 + "px";
+      elem.style.left = elemCoords.left + randomDistance1 + "px";
     }
-    if (elemCoords.bottom + dist2 >= scrollHeight) {
-      elem.style.top = elemCoords.top - 2 * dist2 + "px";
-    } else {
-      elem.style.top = elemCoords.top + dist2 + "px";
-    }
-    return;
   }
-
-  if (pointerRelativeToElem.isLeft && pointerRelativeToElem.isBottom) {
-    //right bounds
-    if (elemCoords.right + dist1 >= scrollWidth) {
-      elem.style.left = elemCoords.left - 2 * dist1 + "px";
+  if (pointer.isRight) {
+    if (elemCoords.left - randomDistance1 <= 0) {
+      elem.style.left = elemCoords.left + 2 * randomDistance1 + "px";
     } else {
-      elem.style.left = elemCoords.left + dist1 + "px";
+      elem.style.left = elemCoords.left - randomDistance1 + "px";
     }
-    if (elemCoords.top - dist2 <= 0) {
-      elem.style.top = elemCoords.top + 2 * dist2 + "px";
-    } else {
-      elem.style.top = elemCoords.top - dist2 + "px";
-    }
-    return;
   }
-
-  if (pointerRelativeToElem.isRight && pointerRelativeToElem.isTop) {
-    //left bounds
-    if (elemCoords.left - dist1 <= 0) {
-      elem.style.left = elemCoords.left + 2 * dist1 + "px";
+  if (pointer.isTop) {
+    if (elemCoords.bottom + randomDistance2 >= scrollHeight) {
+      elem.style.top = elemCoords.top - 2 * randomDistance2 + "px";
     } else {
-      elem.style.left = elemCoords.left - dist1 + "px";
+      elem.style.top = elemCoords.top + randomDistance2 + "px";
     }
-    //bottom bounds
-    if (elemCoords.bottom + dist2 >= scrollHeight) {
-      elem.style.top = elemCoords.top - 2 * dist2 + "px";
-    } else {
-      elem.style.top = elemCoords.top + dist2 + "px";
-    }
-    return;
   }
-
-  if (pointerRelativeToElem.isRight && pointerRelativeToElem.isBottom) {
-    //left bounds
-    if (elemCoords.left - dist1 <= 0) {
-      elem.style.left = elemCoords.left + 2 * dist1 + "px";
+  if (pointer.isBottom) {
+    if (elemCoords.top - randomDistance2 <= 0) {
+      elem.style.top = elemCoords.top + 2 * randomDistance2 + "px";
     } else {
-      elem.style.left = elemCoords.left - dist1 + "px";
+      elem.style.top = elemCoords.top - randomDistance2 + "px";
     }
-    //top bounds
-    if (elemCoords.top - dist2 <= 0) {
-      elem.style.top = elemCoords.top + 2 * dist2 + "px";
-    } else {
-      elem.style.top = elemCoords.top - dist2 + "px";
-    }
-    return;
   }
 }
